@@ -4,10 +4,14 @@ import android.app.Application
 
 class ExApp: Application() {
 //    private lateinit var texts: List<String>
-    val textManager: TextManager = TextManager(this)
+    lateinit var textManager: TextManager private set
+    lateinit var exNotificationManager: ExNotificationManager private set
 
-    init {
-
+    override fun onCreate() {
+        super.onCreate()
+        textManager = TextManager(this).apply {
+            fetchTexts()
+        }
+        exNotificationManager = ExNotificationManager(this)
     }
-
 }
