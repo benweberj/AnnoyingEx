@@ -1,42 +1,31 @@
 package com.benjweber.ex
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
-import android.os.Build
+import android.content.Intent
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.benjweber.ex.ExNotificationManager.Companion.MESSAGES_CHANNEL_ID
+import kotlin.random.Random
 
 class SendTextWorker(private val context: Context, params: WorkerParameters): Worker(context, params) {
-    private val notificationManagerCompat = NotificationManagerCompat.from(context)
-
-    init { createChannel() }
-
     override fun doWork(): Result {
-        var textNotification = NotificationCompat.Builder(context, DANGEROUS_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+        val randText = (context as ExApp).textManager.getRandomText()
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            putExtra("text", randText)
+        }
+        val pendingIntent = PendingIntent.getActivity(context, Random.nextInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        var textNotification = NotificationCompat.Builder(context, MESSAGES_CHANNEL_ID)
+            .setSmallIcon(R.drawable.sentiment_dissatisfied)
             .setContentTitle("Grace")
-            .setContentText((context as ExApp).textManager.getRandomText())
+            .setContentText(randText)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
             .build()
-        notificationManagerCompat.notify(69, textNotification)
+        context.exNotificationManager.postNotification(textNotification)
         return Result.success()
     }
-
-    private fun createChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Dangerous Notifications"
-            val descriptionText = "Messages that will make you feel unsafe."
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(DANGEROUS_CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
-            notificationManagerCompat.createNotificationChannel(channel)
-        }
-    }
-
-    companion object { const val DANGEROUS_CHANNEL_ID = "DANGEROUS_CHANNEL_ID" }
 }

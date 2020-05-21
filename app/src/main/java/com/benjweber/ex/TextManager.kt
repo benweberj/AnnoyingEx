@@ -11,7 +11,7 @@ import com.google.gson.Gson
 import kotlin.random.Random
 
 class TextManager(private val context: Context) {
-    lateinit var texts: List<String>
+    private var texts: List<String>? = null
     private val q: RequestQueue = Volley.newRequestQueue(context)
     private val textsEndpoint = "https://raw.githubusercontent.com/echeeUW/codesnippets/master/ex_messages.json"
 
@@ -28,9 +28,8 @@ class TextManager(private val context: Context) {
     }
 
     fun getRandomText(): String {
-        return texts[Random.nextInt(texts.size)]
+        return if (texts === null || texts!!.isEmpty()) "unable to retrieve message" else texts!![Random.nextInt(texts!!.size-1)]
     }
 }
 
 data class Messages(val messages: List<String>)
-

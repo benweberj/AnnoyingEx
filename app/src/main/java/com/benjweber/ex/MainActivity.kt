@@ -2,8 +2,7 @@ package com.benjweber.ex
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import androidx.work.Constraints
+import android.text.Html
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -12,15 +11,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val exApp = application as ExApp
-        val textManager = exApp.textManager
-        val exNotificationManager = exApp.exNotificationManager
+        val exNotificationManager = (application as ExApp).exNotificationManager
 
         btnStart.setOnClickListener {
             exNotificationManager.releaseHer()
         }
         btnStop.setOnClickListener {
             exNotificationManager.blockHer()
+        }
+        if (intent.hasExtra("text")) {
+            tvMessage.text = Html.fromHtml("<strong>Grace</strong>: <em>${intent.getStringExtra("text")}</em>")
         }
     }
 }
